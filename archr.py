@@ -2,8 +2,22 @@
 import asyncio
 from bleak import BleakScanner
 import aiohttp
+import asyncio
+from bleak import BleakScanner
+import requests
 
 async def main():
+    while True:
+        deviceName = input('Enter device name: ')
+        deviceName = deviceName.strip().replace("’","'")
+        cardNumber = input('Enter card number (sample): ')
+        res = await BleakScanner.find_device_by_name(deviceName)
+        
+        if res != None:
+            str = "http://34.138.254.116:80/add/" + res.address + "/" + cardNumber
+            requests.get(str)
+            
+
     async with aiohttp.ClientSession() as session:
         while True:
             devices = await BleakScanner.discover()
