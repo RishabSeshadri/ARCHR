@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATM</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bank.css') }}">
+</head>
+<body>
+  <center>
+  <input type="text" id="deviceName" name="device"><br><br>
+  <button onclick="findDevice()">Add Device</button><br><br>
+  <div id="popUpText" style="visibility:hidden;">Awaiting action...</div>
+  <hr style="height:2px; border-width:0; color:gray; background-color:gray; width:80%; margin-top: 20px;">
+  <table id="deviceTable">
+    <thead>
+        <tr>
+            <th>Device Name</th>
+            <th>Authentication Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dynamic content will be inserted here -->
+    </tbody>  
+</table>
+  <script>
+    async function findDevice() {
+      console.log("rchd");
+      const deviceName = document.getElementById("deviceName").value;
+      document.getElementById("popUpText").textContent = "Searching...";
+      document.getElementById("popUpText").style.visibility = "visible";
+      
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `deviceName=${deviceName}` 
+      });
+      const data = await response.text();
+      document.getElementById("popUpText").textContent = data;
+    }
+    
+    async function updateDeviceTable() {
+      const response = await fetch('/get-devices');
+      const data = await response.json();
+      const tableBody = document.getElementById('deviceTable').getElementsByTagName('tbody')[0];
+      tableBody.innerHTML = '';
+
+        Object.entries(data).forEach(([name, auth]) => {
+            const row = tableBody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            cell1.textContent = name;
+            cell2.textContent = auth;
+        });
+    } // updateDeviceTable
+
+    setInterval(updateDeviceTable, 2500);
+    document.addEventListener('DOMContentLoaded', updateDeviceTable);
+  </script>
+  </center>
+</body>
+</html>
