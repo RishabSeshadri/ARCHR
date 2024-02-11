@@ -1,23 +1,10 @@
-
 import asyncio
 from bleak import BleakScanner
-import aiohttp
 import requests
 
-from flask import Flask, request, render_template, jsonify
-import time
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
-devices = {
-    'Device1': 1
-}
-
-@app.route('/get-devices')
-def get_devices():
-    str = "http://34.138.254.116:80/getall"
-    res = requests.get(str)
-    return res.json()
-
 
 @app.route('/', methods=['GET', 'POST'])
 async def home():
@@ -25,14 +12,12 @@ async def home():
         deviceName = request.form['deviceName']
         res = await BleakScanner.find_device_by_name(deviceName)
     
-        if res != None:
-            str = "http://34.138.254.116:80/add/" + res.address + "/" + deviceName
-            ret = requests.get(str)
-            if ret.json() != None:
+        if res is not None:
+            url = f"http://34.138.254.116:80/add/{res.address}/{deviceName}"
+            ret = requests.get(url)
+            if ret.json() is not None:
                 return f"{deviceName} already exists in the database."
-            
             return f"Successfully added {deviceName}."
-
         return f"Failed at adding '{deviceName}'. The device was not found."
     else:
         return render_template('bank.html')
