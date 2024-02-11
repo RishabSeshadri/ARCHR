@@ -1,14 +1,22 @@
+
 import asyncio
 from bleak import BleakScanner
+import aiohttp
 
 async def main():
-    devices = await BleakScanner.discover()
-    print(await BleakScanner.find_device_by_address("B0:BE:83:4B:F1:B8"))
-    #for d in devices:
+    async with aiohttp.ClientSession() as session:
+        while True:
+            devices = await BleakScanner.discover()
 
-        # DC:B5:4F:AB:CC:8C me
-        # B0:BE:83:4B:F1:B8 carlos
-        # print("[", d.address.strip(), "]")      
-            
+            for d in devices:
+                url = f"http://34.138.254.116:80/isValid/{d.address}"
+
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if data:
+                            print("[Address:", d.address, "; Card number: ", data, "]")
+                        
+            await asyncio.sleep(1)
 
 asyncio.run(main())
